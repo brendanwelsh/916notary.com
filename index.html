@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>916notary.com — Premium Sacramento Domain For Sale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  background: #0a0612;
+  color: #e8ecf2;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== MAP ===== */
+#map { position: fixed; inset: 0; z-index: 0; }
+.leaflet-control-attribution, .leaflet-control-zoom { display: none !important; }
+
+/* ===== BEAM from Golden 1 Center ===== */
+.beam {
+  position: fixed;
+  z-index: 5;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+/* ===== SALE TAKEOVER BANNER ===== */
+.takeover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: linear-gradient(135deg, rgba(91,45,142,0.95), rgba(60,20,100,0.92));
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.takeover-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.for-sale-badge {
+  padding: 8px 20px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #fff;
+  white-space: nowrap;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.15); }
+  50% { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+}
+
+.takeover-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.takeover-title .domain { color: #d4a0ff; }
+
+.takeover-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.btn-offer {
+  padding: 14px 32px;
+  background: #fff;
+  color: #3c1464;
+  border: none;
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-offer:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
+
+.btn-offer-ghost {
+  padding: 13px 24px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-offer-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+
+/* ===== PANEL ===== */
+.panel {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  bottom: 0;
+  width: 420px;
+  z-index: 10;
+  background: linear-gradient(180deg, rgba(10,6,18,0.96), rgba(10,6,18,0.92));
+  backdrop-filter: blur(30px);
+  border-right: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  flex-direction: column;
+  padding: 32px 32px;
+  justify-content: space-between;
+  overflow-y: auto;
+}
+
+.brand {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.brand .code { color: #9b59d0; }
+
+.tagline {
+  font-size: 12px;
+  color: #6b5d7a;
+  margin-bottom: 28px;
+}
+
+.demo-label {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(155,89,208,0.1);
+  border: 1px solid rgba(155,89,208,0.15);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #9b59d0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+
+.pitch h2 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+  color: #c8b8d8;
+}
+
+.pitch p {
+  font-size: 13px;
+  color: #6b5d7a;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Demo stats — clearly fake */
+.demo-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.demo-stat {
+  padding: 12px;
+  background: rgba(155,89,208,0.06);
+  border: 1px solid rgba(155,89,208,0.08);
+  border-radius: 10px;
+  text-align: center;
+}
+.demo-stat .val {
+  font-size: 18px;
+  font-weight: 700;
+  color: #9b59d0;
+}
+.demo-stat .lbl {
+  font-size: 9px;
+  color: #6b5d7a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.sample-note {
+  font-size: 10px;
+  color: rgba(107,93,122,0.5);
+  text-align: center;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* Services demo */
+.services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.svc {
+  padding: 5px 11px;
+  background: rgba(155,89,208,0.06);
+  border: 1px solid rgba(155,89,208,0.08);
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8a7a9a;
+}
+
+/* Value props */
+.value-props {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.vprop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #8a7a9a;
+}
+.vprop .check {
+  color: #9b59d0;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.panel-footer {
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  font-size: 11px;
+  color: rgba(107,93,122,0.4);
+  text-align: center;
+}
+
+/* ===== LEGEND ===== */
+.legend {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  background: rgba(10,6,18,0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.legend-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6b5d7a;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #6b5d7a;
+  margin-bottom: 4px;
+}
+.legend-item:last-child { margin-bottom: 0; }
+.legend-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.legend-dot.purple { background: #9b59d0; box-shadow: 0 0 8px rgba(155,89,208,0.4); }
+.legend-dot.ring { background: transparent; border: 2px solid rgba(155,89,208,0.3); }
+
+/* ===== INQUIRY MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: #120a1e;
+  border: 1px solid rgba(155,89,208,0.15);
+  border-radius: 20px;
+  padding: 36px;
+  width: 90%;
+  max-width: 440px;
+  position: relative;
+}
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #9b59d0, transparent);
+}
+.modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: none;
+  border: none;
+  color: #6b5d7a;
+  font-size: 20px;
+  cursor: pointer;
+}
+.modal-close:hover { color: #e8ecf2; }
+.modal h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.modal .modal-sub { font-size: 13px; color: #6b5d7a; margin-bottom: 22px; }
+.modal label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b5d7a;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.modal input, .modal textarea {
+  width: 100%;
+  padding: 11px 13px;
+  background: #0a0612;
+  border: 1px solid rgba(155,89,208,0.1);
+  border-radius: 9px;
+  color: #e8ecf2;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+.modal input:focus, .modal textarea:focus { border-color: #9b59d0; }
+.modal textarea { resize: vertical; min-height: 70px; }
+.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal .btn-offer {
+  width: 100%;
+  margin-top: 4px;
+  padding: 13px;
+  background: #9b59d0;
+  color: #fff;
+}
+.modal .btn-offer:hover { box-shadow: 0 6px 24px rgba(155,89,208,0.35); }
+.modal-success { display: none; text-align: center; padding: 24px 0; }
+.modal-success.show { display: block; }
+.modal-success .icon { font-size: 40px; margin-bottom: 10px; }
+.modal-success h3 { font-size: 18px; margin-bottom: 4px; }
+.modal-success p { font-size: 13px; color: #6b5d7a; }
+.hp { position: absolute; left: -9999px; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 900px) {
+  .takeover {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px 20px;
+    gap: 14px;
+  }
+  .takeover-title { font-size: 22px; }
+  .takeover-right { width: 100%; }
+  .btn-offer, .btn-offer-ghost { flex: 1; text-align: center; }
+  .panel {
+    width: 100%;
+    top: auto;
+    bottom: 0;
+    max-height: 48vh;
+    border-right: none;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    border-radius: 20px 20px 0 0;
+    padding: 22px 20px 28px;
+  }
+  .legend { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- BEAM CANVAS (from Golden 1 Center) -->
+<canvas id="beamCanvas" class="beam"></canvas>
+
+<!-- TOP BANNER — FOR SALE TAKEOVER -->
+<div class="takeover">
+  <div class="takeover-left">
+    <div class="for-sale-badge">For Sale</div>
+    <div class="takeover-title"><span class="domain">916notary.com</span> — Site &amp; Domain For Sale</div>
+  </div>
+  <div class="takeover-right">
+    <button class="btn-offer" onclick="openModal()">Make an Offer</button>
+    <a href="mailto:hello@916notary.com?subject=Inquiry%20-%20916notary.com" class="btn-offer-ghost">Email Us</a>
+  </div>
+</div>
+
+<!-- SIDE PANEL — WHAT THE BUYER GETS -->
+<div class="panel">
+  <div>
+    <div class="brand"><span class="code">916</span>notary</div>
+    <div class="tagline">What your site could look like, day one.</div>
+
+    <div class="demo-label">Sample Demo</div>
+
+    <div class="pitch">
+      <h2>Own Sacramento's notary domain.</h2>
+      <p>Exact-match local SEO. Instant credibility. 916 is Sacramento — every resident knows it. This domain works before you spend a dollar on ads.</p>
+    </div>
+
+    <div class="demo-stats">
+      <div class="demo-stat">
+        <div class="val">X,XXX</div>
+        <div class="lbl">Signings</div>
+      </div>
+      <div class="demo-stat">
+        <div class="val">24m</div>
+        <div class="lbl">Avg ETA</div>
+      </div>
+      <div class="demo-stat">
+        <div class="val">5.0</div>
+        <div class="lbl">Rating</div>
+      </div>
+    </div>
+    <div class="sample-note">* Sample metrics — your numbers go here</div>
+
+    <div class="services">
+      <span class="svc">Loan Signings</span>
+      <span class="svc">Power of Attorney</span>
+      <span class="svc">Healthcare</span>
+      <span class="svc">Legal</span>
+      <span class="svc">Apostille</span>
+      <span class="svc">Corporate</span>
+    </div>
+
+    <div class="value-props">
+      <div class="vprop"><span class="check">&#10003;</span> Exact-match domain: 916 + notary</div>
+      <div class="vprop"><span class="check">&#10003;</span> Ready-to-launch site included</div>
+      <div class="vprop"><span class="check">&#10003;</span> Real Sacramento coverage map</div>
+      <div class="vprop"><span class="check">&#10003;</span> Mobile-first, modern, fast</div>
+      <div class="vprop"><span class="check">&#10003;</span> Contact form with lead capture</div>
+      <div class="vprop"><span class="check">&#10003;</span> Animated notary tracker demo</div>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    Also listed on Afternic &middot; Dan.com &middot; Sedo
+  </div>
+</div>
+
+<!-- MAP LEGEND -->
+<div class="legend">
+  <div class="legend-title">Coverage Demo</div>
+  <div class="legend-item"><div class="legend-dot purple"></div> Sacramento HQ</div>
+  <div class="legend-item"><div class="legend-dot ring"></div> Service cities</div>
+</div>
+
+<!-- INQUIRY MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h2>Make an Offer</h2>
+    <p class="modal-sub">Interested in 916notary.com? Let's talk.</p>
+    <form id="inquiryForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <div class="modal-row">
+        <div><label>Name</label><input type="text" name="name" required placeholder="Your name"></div>
+        <div><label>Email</label><input type="email" name="email" required placeholder="you@email.com"></div>
+      </div>
+      <label>Your Offer / Message</label>
+      <textarea name="message" placeholder="I'm interested in purchasing 916notary.com..."></textarea>
+      <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off">
+      <button type="submit" class="btn-offer">Send Inquiry</button>
+    </form>
+    <div class="modal-success" id="formSuccess">
+      <div class="icon">&#10003;</div>
+      <h3>Inquiry Sent</h3>
+      <p>We'll get back to you within 24 hours.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ===== MAP =====
+const map = L.map('map', {
+  center: [38.56, -121.32],
+  zoom: 12,
+  zoomControl: false,
+  attributionControl: false,
+  dragging: true,
+  scrollWheelZoom: false,
+  doubleClickZoom: false,
+  touchZoom: true,
+});
+
+// Dark purple-tinted basemap
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19,
+}).addTo(map);
+
+// Purple tint overlay on map tiles
+const mapEl = document.getElementById('map');
+mapEl.style.filter = 'saturate(0.5) hue-rotate(20deg) brightness(0.85)';
+
+// ===== COVERAGE RADIUS =====
+L.circle([38.5816, -121.4944], {
+  radius: 48000,
+  color: '#9b59d0',
+  weight: 1.5,
+  opacity: 0.25,
+  fillColor: '#9b59d0',
+  fillOpacity: 0.04,
+  dashArray: '8 6',
+}).addTo(map);
+
+L.circle([38.5816, -121.4944], {
+  radius: 24000,
+  color: '#9b59d0',
+  weight: 1,
+  opacity: 0.12,
+  fill: false,
+  dashArray: '4 6',
+}).addTo(map);
+
+// ===== CITIES =====
+const cities = [
+  { name: 'Sacramento',      lat: 38.5816, lng: -121.4944, main: true },
+  { name: 'Folsom',          lat: 38.6780, lng: -121.1761 },
+  { name: 'Roseville',       lat: 38.7521, lng: -121.2880 },
+  { name: 'Elk Grove',       lat: 38.4088, lng: -121.3716 },
+  { name: 'Rancho Cordova',  lat: 38.5891, lng: -121.3028 },
+  { name: 'Citrus Heights',  lat: 38.7071, lng: -121.2811 },
+  { name: 'Davis',           lat: 38.5449, lng: -121.7405 },
+  { name: 'Woodland',        lat: 38.6785, lng: -121.7733 },
+  { name: 'Rocklin',         lat: 38.7908, lng: -121.2358 },
+  { name: 'El Dorado Hills', lat: 38.6857, lng: -121.0750 },
+  { name: 'Granite Bay',     lat: 38.7632, lng: -121.1639 },
+  { name: 'West Sacramento', lat: 38.5805, lng: -121.5300 },
+  { name: 'Carmichael',      lat: 38.6257, lng: -121.3283 },
+  { name: 'Fair Oaks',       lat: 38.6447, lng: -121.2722 },
+  { name: 'Orangevale',      lat: 38.6780, lng: -121.2253 },
+  { name: 'Natomas',         lat: 38.6424, lng: -121.5069 },
+  { name: 'Lincoln',         lat: 38.8916, lng: -121.2930 },
+  { name: 'Placerville',     lat: 38.7296, lng: -120.7983 },
+];
+
+cities.forEach(city => {
+  const size = city.main ? 14 : 7;
+  const icon = L.divIcon({
+    className: '',
+    html: city.main
+      ? `<div style="width:${size}px;height:${size}px;background:#9b59d0;border-radius:50%;box-shadow:0 0 20px rgba(155,89,208,0.6),0 0 60px rgba(155,89,208,0.2);border:2px solid rgba(155,89,208,0.8);"></div>`
+      : `<div style="width:${size}px;height:${size}px;background:rgba(155,89,208,0.65);border-radius:50%;box-shadow:0 0 8px rgba(155,89,208,0.3);border:1.5px solid rgba(155,89,208,0.35);"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+  });
+  const m = L.marker([city.lat, city.lng], { icon }).addTo(map);
+  m.bindTooltip(city.name, {
+    permanent: city.main,
+    direction: city.main ? 'right' : 'top',
+    offset: city.main ? [12, 0] : [0, -6],
+    className: 'city-tooltip',
+  });
+});
+
+// Tooltip style
+const s = document.createElement('style');
+s.textContent = `
+  .city-tooltip {
+    background: rgba(18,10,30,0.94) !important;
+    color: #e8ecf2 !important;
+    border: 1px solid rgba(155,89,208,0.2) !important;
+    border-radius: 8px !important;
+    padding: 4px 11px !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+  }
+  .leaflet-tooltip-top::before { border-top-color: rgba(18,10,30,0.94) !important; }
+  .leaflet-tooltip-right::before { border-right-color: rgba(18,10,30,0.94) !important; }
+`;
+document.head.appendChild(s);
+
+// ===== NOTARY ROUTE: FOLSOM → ELK GROVE =====
+const route = [
+  [38.6780, -121.1761],  // Folsom
+  [38.6550, -121.2100],
+  [38.6350, -121.2500],
+  [38.6150, -121.2800],
+  [38.5891, -121.3028],  // Rancho Cordova
+  [38.5816, -121.3500],
+  [38.5700, -121.3800],
+  [38.5500, -121.3900],
+  [38.5200, -121.3850],
+  [38.4800, -121.3800],
+  [38.4500, -121.3750],
+  [38.4088, -121.3716],  // Elk Grove
+];
+
+L.polyline(route, { color: '#9b59d0', weight: 3, opacity: 0.5 }).addTo(map);
+
+const nIcon = L.divIcon({
+  className: '',
+  html: `<div style="width:30px;height:30px;background:#9b59d0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif;box-shadow:0 0 20px rgba(155,89,208,0.5),0 0 50px rgba(155,89,208,0.15);border:2px solid rgba(255,255,255,0.15);animation:np 2s ease-in-out infinite;">N</div><style>@keyframes np{0%,100%{box-shadow:0 0 20px rgba(155,89,208,0.5),0 0 0 0 rgba(155,89,208,0.3)}50%{box-shadow:0 0 20px rgba(155,89,208,0.5),0 0 0 10px rgba(155,89,208,0)}}</style>`,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+const nm = L.marker(route[0], { icon: nIcon }).addTo(map);
+nm.bindTooltip('Notary en route', { direction: 'top', offset: [0, -20], className: 'city-tooltip' });
+
+let ri = 0;
+setInterval(() => { ri = (ri + 1) % route.length; nm.setLatLng(route[ri]); }, 2500);
+
+// ===== GOLDEN 1 CENTER BEAM =====
+const g1LatLng = [38.5802, -121.4997]; // Golden 1 Center
+
+// G1 marker
+const g1Icon = L.divIcon({
+  className: '',
+  html: `<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:16px;filter:drop-shadow(0 0 12px rgba(155,89,208,0.6));">&#128081;</div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+const g1Marker = L.marker(g1LatLng, { icon: g1Icon }).addTo(map);
+g1Marker.bindTooltip('Golden 1 Center', { direction: 'top', offset: [0, -14], className: 'city-tooltip' });
+
+// Canvas beam from G1
+const canvas = document.getElementById('beamCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawBeam() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Convert G1 lat/lng to screen pixel
+  const g1Point = map.latLngToContainerPoint(g1LatLng);
+  const x = g1Point.x;
+  const y = g1Point.y;
+
+  // Solid straight beam — no spread
+  const beamWidth = 6;
+
+  // Outer glow
+  ctx.beginPath();
+  ctx.moveTo(x - beamWidth * 2, y);
+  ctx.lineTo(x - beamWidth * 2, 0);
+  ctx.lineTo(x + beamWidth * 2, 0);
+  ctx.lineTo(x + beamWidth * 2, y);
+  ctx.closePath();
+  const glowGrad = ctx.createLinearGradient(x - beamWidth * 2, 0, x + beamWidth * 2, 0);
+  glowGrad.addColorStop(0, 'rgba(155, 89, 208, 0)');
+  glowGrad.addColorStop(0.3, 'rgba(155, 89, 208, 0.12)');
+  glowGrad.addColorStop(0.5, 'rgba(155, 89, 208, 0.2)');
+  glowGrad.addColorStop(0.7, 'rgba(155, 89, 208, 0.12)');
+  glowGrad.addColorStop(1, 'rgba(155, 89, 208, 0)');
+  ctx.fillStyle = glowGrad;
+  ctx.fill();
+
+  // Core beam — solid, straight, no taper
+  ctx.beginPath();
+  ctx.moveTo(x - beamWidth / 2, y);
+  ctx.lineTo(x - beamWidth / 2, 0);
+  ctx.lineTo(x + beamWidth / 2, 0);
+  ctx.lineTo(x + beamWidth / 2, y);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(180, 130, 255, 0.45)';
+  ctx.fill();
+
+  // Bright center line
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, 0);
+  ctx.strokeStyle = 'rgba(220, 190, 255, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  requestAnimationFrame(drawBeam);
+}
+drawBeam();
+
+// Redraw beam when map moves
+map.on('move', () => {});
+
+// ===== MODAL =====
+function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ===== FORM =====
+document.getElementById('inquiryForm').addEventListener('submit', function(e) {
+  if (this.action.includes('YOUR_FORM_ID')) {
+    e.preventDefault();
+    this.style.display = 'none';
+    document.getElementById('formSuccess').classList.add('show');
+    return;
+  }
+  e.preventDefault();
+  fetch(this.action, { method: 'POST', body: new FormData(this), headers: { 'Accept': 'application/json' } })
+    .then(() => { this.style.display = 'none'; document.getElementById('formSuccess').classList.add('show'); })
+    .catch(() => { this.style.display = 'none'; document.getElementById('formSuccess').classList.add('show'); });
+});
+</script>
+</body>
+</html>
