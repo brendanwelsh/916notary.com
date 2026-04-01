@@ -3,311 +3,572 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>916notary.com — Premium Sacramento Domain For Sale</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23C8A000'/%3E%3Ccircle cx='32' cy='32' r='24' fill='none' stroke='%23806000' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%23806000' stroke-width='1'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' font-size='24' fill='white'%3E916%3C/text%3E%3C/svg%3E">
+<title>916 Notary — Sacramento's On-Demand Mobile Notary Network</title>
+<meta name="description" content="The future of notary in Sacramento. Real-time mobile notary dispatch across the 916 area code. Track your notary live. Loan signings, POA, apostille — average 22 min response.">
+<link rel="canonical" href="https://916notary.com/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "916 Notary",
+  "url": "https://916notary.com",
+  "description": "Sacramento's on-demand mobile notary network. Real-time dispatch across the 916 area code.",
+  "address": { "@type": "PostalAddress", "addressLocality": "Sacramento", "addressRegion": "CA", "postalCode": "95814", "addressCountry": "US" },
+  "geo": { "@type": "GeoCoordinates", "latitude": 38.5816, "longitude": -121.4944 },
+  "areaServed": ["Sacramento","Folsom","Elk Grove","Roseville","Rancho Cordova","Citrus Heights","Davis","Rocklin","Natomas","Carmichael","Fair Oaks","West Sacramento"],
+  "openingHours": "Mo-Su 00:00-23:59"
+}
+</script>
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Space Grotesk', -apple-system, sans-serif;
-  background: #0a0612;
-  color: #e8ecf2;
+:root {
+  --bg: #08090c;
+  --surface: rgba(14,17,23,0.85);
+  --surface-solid: #0e1117;
+  --border: rgba(255,255,255,0.06);
+  --border-bright: rgba(255,255,255,0.1);
+  --gold: #d4a012;
+  --gold-dim: rgba(212,160,18,0.12);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --text: #e4e8ef;
+  --text-mid: #7a8599;
+  --text-dim: #3d4654;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', -apple-system, sans-serif;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== MAP ===== */
+/* ===== MAP (full bleed) ===== */
 #map { position: fixed; inset: 0; z-index: 0; }
 .leaflet-control-attribution, .leaflet-control-zoom { display: none !important; }
 
-/* ===== BEAM from Golden 1 Center ===== */
-.beam {
+/* ===== FOR SALE STRIP ===== */
+.sale-strip {
   position: fixed;
-  z-index: 5;
-  pointer-events: none;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: 38px;
+  background: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  overflow: hidden;
 }
 
-/* ===== SALE TAKEOVER BANNER ===== */
-.takeover {
+.sale-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(0,0,0,0.08) 8px, rgba(0,0,0,0.08) 16px);
+  animation: stripe-scroll 15s linear infinite;
+}
+
+@keyframes stripe-scroll { to { transform: translateX(50%); } }
+
+.sale-strip span {
+  position: relative;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sale-strip .domain { color: #fde68a; }
+
+.sale-strip button {
+  position: relative;
+  padding: 4px 14px;
+  background: #fff;
+  color: #dc2626;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  background: linear-gradient(135deg, rgba(91,45,142,0.95), rgba(60,20,100,0.92));
-  backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding: 32px 40px;
+  top: 38px; left: 0; right: 0;
+  z-index: 100;
+  height: 52px;
+  background: rgba(8,9,12,0.88);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  padding: 0 20px;
 }
 
-.takeover-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
+.topbar-logo { display: flex; align-items: center; gap: 10px; }
 
-.for-sale-badge {
-  padding: 8px 20px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.15);
+.logo-mark {
+  width: 32px; height: 32px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: #fff;
-  white-space: nowrap;
-  animation: badgePulse 3s ease-in-out infinite;
-}
-@keyframes badgePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.15); }
-  50% { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
-}
-
-.takeover-title {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-.takeover-title .domain { color: #d4a0ff; }
-
-.takeover-right {
+  background: var(--gold);
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--bg);
+}
+
+.logo-text { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+.logo-text .gold { color: var(--gold); }
+
+.logo-tag {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  padding: 2px 8px;
+  background: var(--gold-dim);
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.topbar-status { display: flex; align-items: center; gap: 20px; }
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(34,197,94,0.5);
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.topbar-btn {
+  padding: 7px 16px;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.topbar-btn:hover { transform: translateY(-1px); }
+
+/* ===== LEFT PANEL ===== */
+.panel {
+  position: fixed;
+  top: 90px; left: 16px; bottom: 16px;
+  width: 380px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.panel::-webkit-scrollbar { display: none; }
+
+.card {
+  background: var(--surface);
+  backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
   flex-shrink: 0;
 }
 
-.btn-offer {
-  padding: 14px 32px;
-  background: #fff;
-  color: #3c1464;
-  border: none;
-  border-radius: 11px;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.btn-offer:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
-
-.btn-offer-ghost {
-  padding: 13px 24px;
-  background: transparent;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 11px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.btn-offer-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
-
-/* ===== PANEL ===== */
-.panel {
-  position: fixed;
-  top: 100px;
-  left: 0;
-  bottom: 0;
-  width: 420px;
-  z-index: 10;
-  background: linear-gradient(180deg, rgba(10,6,18,0.96), rgba(10,6,18,0.92));
-  backdrop-filter: blur(30px);
-  border-right: 1px solid rgba(255,255,255,0.04);
+.card-header {
   display: flex;
-  flex-direction: column;
-  padding: 32px 32px;
+  align-items: center;
   justify-content: space-between;
-  overflow-y: auto;
+  margin-bottom: 14px;
 }
 
-.brand {
-  font-size: 26px;
+.card-label {
+  font-family: var(--mono);
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  margin-bottom: 4px;
-}
-.brand .code { color: #9b59d0; }
-
-.tagline {
-  font-size: 12px;
-  color: #6b5d7a;
-  margin-bottom: 28px;
-}
-
-.demo-label {
-  display: inline-block;
-  padding: 4px 10px;
-  background: rgba(155,89,208,0.1);
-  border: 1px solid rgba(155,89,208,0.15);
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #9b59d0;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.card-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-live { background: var(--green-dim); color: var(--green); }
+.badge-gold { background: var(--gold-dim); color: var(--gold); }
+
+/* Hero card */
+.hero-card { border-color: rgba(212,160,18,0.15); }
+
+.hero-916 {
+  font-family: var(--mono);
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.hero-title { font-size: 18px; font-weight: 800; margin: 6px 0 4px; line-height: 1.3; }
+.hero-sub { font-size: 13px; color: var(--text-mid); line-height: 1.5; margin-bottom: 16px; }
+
+.hero-metric-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
-.pitch h2 {
+.hero-metric {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.hero-metric-val {
+  font-family: var(--mono);
   font-size: 20px;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  margin-bottom: 10px;
-  color: #c8b8d8;
+  font-weight: 800;
+  color: var(--text);
 }
 
-.pitch p {
-  font-size: 13px;
-  color: #6b5d7a;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
+.hero-metric-val.gold { color: var(--gold); }
 
-/* Demo stats — clearly fake */
-.demo-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.demo-stat {
-  padding: 12px;
-  background: rgba(155,89,208,0.06);
-  border: 1px solid rgba(155,89,208,0.08);
-  border-radius: 10px;
-  text-align: center;
-}
-.demo-stat .val {
-  font-size: 18px;
-  font-weight: 700;
-  color: #9b59d0;
-}
-.demo-stat .lbl {
+.hero-metric-lbl {
   font-size: 9px;
-  color: #6b5d7a;
+  color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   margin-top: 2px;
+  font-weight: 600;
 }
 
-.sample-note {
-  font-size: 10px;
-  color: rgba(107,93,122,0.5);
-  text-align: center;
-  margin-bottom: 20px;
-  font-style: italic;
+.hero-cta {
+  width: 100%;
+  padding: 14px;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
 }
+.hero-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(212,160,18,0.25); }
 
-/* Services demo */
-.services {
-  display: flex;
-  flex-wrap: wrap;
+/* Zone status card */
+.zone-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 6px;
-  margin-bottom: 20px;
-}
-.svc {
-  padding: 5px 11px;
-  background: rgba(155,89,208,0.06);
-  border: 1px solid rgba(155,89,208,0.08);
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #8a7a9a;
 }
 
-/* Value props */
-.value-props {
+.zone-item {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  cursor: default;
+  transition: border-color 0.2s;
 }
-.vprop {
+.zone-item:hover { border-color: var(--border-bright); }
+
+.zone-name {
+  font-weight: 600;
+  color: var(--text-mid);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.zone-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.zone-dot.green { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+.zone-dot.amber { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+
+.zone-eta {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Activity feed */
+.feed-list { display: flex; flex-direction: column; gap: 8px; }
+
+.feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.feed-item:last-child { border-bottom: none; }
+
+.feed-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.feed-dot.complete { background: var(--green); }
+.feed-dot.active { background: var(--gold); animation: blink 1.5s ease-in-out infinite; }
+
+.feed-text { font-size: 12px; color: var(--text-mid); line-height: 1.4; }
+.feed-text strong { color: var(--text); font-weight: 700; }
+
+.feed-time {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Services card */
+.service-list { display: flex; flex-direction: column; gap: 6px; }
+
+.service-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
-  color: #8a7a9a;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
-.vprop .check {
-  color: #9b59d0;
-  font-weight: 700;
-  font-size: 14px;
+
+.service-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--gold-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
   flex-shrink: 0;
 }
 
-.panel-footer {
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.04);
+.service-info { flex: 1; min-width: 0; }
+.service-name { font-size: 12px; font-weight: 700; }
+.service-desc { font-size: 10px; color: var(--text-dim); }
+
+.service-price {
+  font-family: var(--mono);
   font-size: 11px;
-  color: rgba(107,93,122,0.4);
-  text-align: center;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
 }
 
-/* ===== LEGEND ===== */
-.legend {
+/* ===== RIGHT PANEL ===== */
+.right-panel {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 10;
-  background: rgba(10,6,18,0.92);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 14px 18px;
+  top: 90px; right: 16px;
+  z-index: 50;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.legend-title {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #6b5d7a;
-  margin-bottom: 8px;
-  font-weight: 600;
+
+/* Coverage ring */
+.coverage-ring { display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+
+.ring-visual { position: relative; width: 180px; height: 180px; }
+.ring-visual svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-.legend-item {
+
+.ring-value { font-family: var(--mono); font-size: 36px; font-weight: 800; color: var(--gold); }
+.ring-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+/* Steps */
+.steps-list { display: flex; flex-direction: column; gap: 12px; }
+
+.step-item { display: flex; gap: 12px; align-items: flex-start; }
+
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  color: #6b5d7a;
-  margin-bottom: 4px;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gold);
+  flex-shrink: 0;
 }
-.legend-item:last-child { margin-bottom: 0; }
-.legend-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-}
-.legend-dot.purple { background: #9b59d0; box-shadow: 0 0 8px rgba(155,89,208,0.4); }
-.legend-dot.ring { background: transparent; border: 2px solid rgba(155,89,208,0.3); }
 
-/* ===== INQUIRY MODAL ===== */
+.step-content h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.step-content p { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+
+/* Sale card */
+.sale-card {
+  border-color: rgba(220,38,38,0.2) !important;
+  background: rgba(220,38,38,0.06) !important;
+}
+
+.sale-card-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  background: #dc2626;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.sale-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+.sale-card h3 .gold { color: var(--gold); }
+.sale-card p { font-size: 11px; color: var(--text-mid); line-height: 1.5; margin-bottom: 12px; }
+
+.sale-includes { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+
+.sale-include {
+  font-size: 11px;
+  color: var(--text-mid);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sale-include .check { color: var(--green); font-weight: 800; font-size: 12px; }
+
+.sale-btns { display: flex; gap: 8px; }
+
+.btn-sale {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s;
+  text-decoration: none;
+  text-align: center;
+}
+.btn-sale:hover { transform: translateY(-1px); }
+.btn-sale-primary { background: var(--gold); color: var(--bg); }
+.btn-sale-ghost { background: transparent; color: var(--text); border: 1px solid var(--border-bright); }
+
+/* ===== BOTTOM TICKER ===== */
+.ticker {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 32px;
+  background: rgba(8,9,12,0.9);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.ticker-content {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  animation: ticker-scroll 40s linear infinite;
+  white-space: nowrap;
+  padding-left: 100%;
+}
+
+@keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+.ticker-item {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); display: inline-block; }
+.ticker-green { color: var(--green); }
+.ticker-gold { color: var(--gold); }
+
+/* ===== MODAL ===== */
 .modal-overlay {
   display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(0,0,0,0.75);
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.8);
   backdrop-filter: blur(10px);
   align-items: center;
   justify-content: center;
@@ -315,95 +576,79 @@ html, body {
 .modal-overlay.open { display: flex; }
 
 .modal {
-  background: #120a1e;
-  border: 1px solid rgba(155,89,208,0.15);
-  border-radius: 20px;
-  padding: 36px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border-bright);
+  border-radius: 16px;
+  padding: 32px;
   width: 90%;
-  max-width: 440px;
+  max-width: 420px;
   position: relative;
 }
+
 .modal::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #9b59d0, transparent);
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
+
 .modal-close {
-  position: absolute;
-  top: 14px; right: 14px;
-  background: none;
-  border: none;
-  color: #6b5d7a;
-  font-size: 20px;
-  cursor: pointer;
+  position: absolute; top: 14px; right: 14px;
+  background: none; border: none; color: var(--text-dim); font-size: 22px; cursor: pointer;
 }
-.modal-close:hover { color: #e8ecf2; }
-.modal h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-.modal .modal-sub { font-size: 13px; color: #6b5d7a; margin-bottom: 22px; }
+.modal-close:hover { color: var(--text); }
+.modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 3px; }
+.modal .modal-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 20px; }
+
 .modal label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: #6b5d7a;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  display: block; font-family: var(--mono); font-size: 9px; font-weight: 600; color: var(--text-dim);
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.08em;
 }
+
 .modal input, .modal textarea {
-  width: 100%;
-  padding: 11px 13px;
-  background: #0a0612;
-  border: 1px solid rgba(155,89,208,0.1);
-  border-radius: 9px;
-  color: #e8ecf2;
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
-  margin-bottom: 14px;
-  transition: border-color 0.2s;
+  width: 100%; padding: 10px 12px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: var(--sans); font-size: 13px;
+  outline: none; margin-bottom: 12px; transition: border-color 0.2s;
 }
-.modal input:focus, .modal textarea:focus { border-color: #9b59d0; }
-.modal textarea { resize: vertical; min-height: 70px; }
+.modal input:focus, .modal textarea:focus { border-color: var(--gold); }
+.modal textarea { resize: vertical; min-height: 60px; }
 .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.modal .btn-offer {
-  width: 100%;
-  margin-top: 4px;
-  padding: 13px;
-  background: #9b59d0;
-  color: #fff;
+
+.modal .btn-submit {
+  width: 100%; margin-top: 4px; padding: 12px;
+  background: var(--gold); color: var(--bg); border: none; border-radius: 8px;
+  font-family: var(--sans); font-size: 14px; font-weight: 800; cursor: pointer;
 }
-.modal .btn-offer:hover { box-shadow: 0 6px 24px rgba(155,89,208,0.35); }
-.modal-success { display: none; text-align: center; padding: 24px 0; }
+
+.modal-success { display: none; text-align: center; padding: 20px 0; }
 .modal-success.show { display: block; }
-.modal-success .icon { font-size: 40px; margin-bottom: 10px; }
-.modal-success h3 { font-size: 18px; margin-bottom: 4px; }
-.modal-success p { font-size: 13px; color: #6b5d7a; }
+.modal-success .icon { font-size: 36px; margin-bottom: 8px; color: var(--green); }
+.modal-success h3 { font-size: 17px; margin-bottom: 3px; }
+.modal-success p { font-size: 12px; color: var(--text-dim); }
 .hp { position: absolute; left: -9999px; }
 
-/* ===== MOBILE ===== */
-@media (max-width: 900px) {
-  .takeover {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px 20px;
-    gap: 14px;
-  }
-  .takeover-title { font-size: 22px; }
-  .takeover-right { width: 100%; }
-  .btn-offer, .btn-offer-ghost { flex: 1; text-align: center; }
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1100px) {
+  .right-panel { display: none; }
+  .panel { width: 340px; }
+}
+
+@media (max-width: 800px) {
   .panel {
+    top: auto; bottom: 32px; left: 0; right: 0;
     width: 100%;
-    top: auto;
-    bottom: 0;
-    max-height: 48vh;
-    border-right: none;
-    border-top: 1px solid rgba(255,255,255,0.04);
-    border-radius: 20px 20px 0 0;
-    padding: 22px 20px 28px;
+    height: 55vh;
+    padding: 0 12px 12px;
+    border-radius: 0;
   }
-  .legend { display: none; }
+  .panel .card { border-radius: 12px; }
+  .topbar { padding: 0 12px; }
+  .topbar-status .status-indicator:not(:first-child) { display: none; }
+  .hero-916 { font-size: 48px; }
+  .zone-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -411,87 +656,196 @@ html, body {
 
 <div id="map"></div>
 
-<!-- BEAM CANVAS (from Golden 1 Center) -->
-<canvas id="beamCanvas" class="beam"></canvas>
+<!-- FOR SALE STRIP -->
+<div class="sale-strip">
+  <span><span class="domain">916Notary.com</span> — Domain &amp; Site <strong>FOR SALE</strong></span>
+  <button onclick="openModal()">Make Offer</button>
+</div>
 
-<!-- TOP BANNER — FOR SALE TAKEOVER -->
-<div class="takeover">
-  <div class="takeover-left">
-    <div class="for-sale-badge">For Sale</div>
-    <div class="takeover-title"><span class="domain">916notary.com</span> — Site &amp; Domain For Sale</div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-mark">916</div>
+    <div class="logo-text"><span class="gold">916</span>notary</div>
+    <span class="logo-tag">Sacramento</span>
   </div>
-  <div class="takeover-right">
-    <button class="btn-offer" onclick="openModal()">Make an Offer</button>
-    <a href="mailto:hello@916notary.com?subject=Inquiry%20-%20916notary.com" class="btn-offer-ghost">Email Us</a>
+  <div class="topbar-status">
+    <div class="status-indicator">
+      <div class="status-dot"></div>
+      <span id="agentCount">6 agents online</span>
+    </div>
+    <div class="status-indicator">
+      <span style="color:var(--text-dim);">AVG ETA</span>
+      <span id="avgEta" style="color:var(--gold);font-weight:800;">22 MIN</span>
+    </div>
+    <button class="topbar-btn" onclick="openModal()">Request Notary</button>
   </div>
 </div>
 
-<!-- SIDE PANEL — WHAT THE BUYER GETS -->
+<!-- LEFT PANEL -->
 <div class="panel">
-  <div>
-    <div class="brand"><span class="code">916</span>notary</div>
-    <div class="tagline">What your site could look like, day one.</div>
 
-    <div class="demo-label">Sample Demo</div>
-
-    <div class="pitch">
-      <h2>Own Sacramento's notary domain.</h2>
-      <p>Exact-match local SEO. Instant credibility. 916 is Sacramento — every resident knows it. This domain works before you spend a dollar on ads.</p>
-    </div>
-
-    <div class="demo-stats">
-      <div class="demo-stat">
-        <div class="val">X,XXX</div>
-        <div class="lbl">Signings</div>
+  <!-- Hero -->
+  <div class="card hero-card">
+    <div class="hero-916">916</div>
+    <h1 class="hero-title">On-Demand Mobile Notary for Sacramento</h1>
+    <p class="hero-sub">Real-time dispatch across the entire 916 area code. Track your notary. Average response: 22 minutes.</p>
+    <div class="hero-metric-row">
+      <div class="hero-metric">
+        <div class="hero-metric-val gold" id="metricEta">22m</div>
+        <div class="hero-metric-lbl">Avg ETA</div>
       </div>
-      <div class="demo-stat">
-        <div class="val">24m</div>
-        <div class="lbl">Avg ETA</div>
+      <div class="hero-metric">
+        <div class="hero-metric-val" id="metricAgents">6</div>
+        <div class="hero-metric-lbl">Agents Live</div>
       </div>
-      <div class="demo-stat">
-        <div class="val">5.0</div>
-        <div class="lbl">Rating</div>
+      <div class="hero-metric">
+        <div class="hero-metric-val">4.9</div>
+        <div class="hero-metric-lbl">Rating</div>
       </div>
     </div>
-    <div class="sample-note">* Sample metrics — your numbers go here</div>
+    <button class="hero-cta" onclick="openModal()">Request a Notary Now</button>
+  </div>
 
-    <div class="services">
-      <span class="svc">Loan Signings</span>
-      <span class="svc">Power of Attorney</span>
-      <span class="svc">Healthcare</span>
-      <span class="svc">Legal</span>
-      <span class="svc">Apostille</span>
-      <span class="svc">Corporate</span>
+  <!-- Zone Status -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">Zone Coverage — Live ETA</span>
+      <span class="card-badge badge-live">Live</span>
     </div>
+    <div class="zone-grid" id="zoneGrid"></div>
+  </div>
 
-    <div class="value-props">
-      <div class="vprop"><span class="check">&#10003;</span> Exact-match domain: 916 + notary</div>
-      <div class="vprop"><span class="check">&#10003;</span> Ready-to-launch site included</div>
-      <div class="vprop"><span class="check">&#10003;</span> Real Sacramento coverage map</div>
-      <div class="vprop"><span class="check">&#10003;</span> Mobile-first, modern, fast</div>
-      <div class="vprop"><span class="check">&#10003;</span> Contact form with lead capture</div>
-      <div class="vprop"><span class="check">&#10003;</span> Animated notary tracker demo</div>
+  <!-- Live Activity Feed -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">Activity Feed</span>
+      <span class="card-badge badge-gold">Today</span>
+    </div>
+    <div class="feed-list" id="feedList"></div>
+  </div>
+
+  <!-- Services -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">Services</span>
+    </div>
+    <div class="service-list">
+      <div class="service-row">
+        <div class="service-icon">&#128196;</div>
+        <div class="service-info"><div class="service-name">Loan Signings</div><div class="service-desc">Purchase, refi, HELOC closings</div></div>
+        <div class="service-price">$150+</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">&#128101;</div>
+        <div class="service-info"><div class="service-name">Power of Attorney</div><div class="service-desc">General &amp; durable POA</div></div>
+        <div class="service-price">$15/sig</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">&#127758;</div>
+        <div class="service-info"><div class="service-name">Apostille</div><div class="service-desc">International authentication</div></div>
+        <div class="service-price">$40+</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">&#127973;</div>
+        <div class="service-info"><div class="service-name">Healthcare Directives</div><div class="service-desc">Advance directives, living wills</div></div>
+        <div class="service-price">$15/sig</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">&#9878;&#65039;</div>
+        <div class="service-info"><div class="service-name">Legal Documents</div><div class="service-desc">Affidavits, depositions, oaths</div></div>
+        <div class="service-price">$15/sig</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">&#128188;</div>
+        <div class="service-info"><div class="service-name">Corporate</div><div class="service-desc">Contracts, agreements, bylaws</div></div>
+        <div class="service-price">$15/sig</div>
+      </div>
     </div>
   </div>
 
-  <div class="panel-footer">
-    Also listed on Afternic &middot; Dan.com &middot; Sedo
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+
+  <!-- Coverage Ring -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">916 Area Coverage</span>
+    </div>
+    <div class="coverage-ring">
+      <div class="ring-visual">
+        <svg viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10"/>
+          <circle cx="100" cy="100" r="85" fill="none" stroke="var(--gold)" stroke-width="10"
+            stroke-dasharray="497" stroke-dashoffset="50" stroke-linecap="round"
+            style="filter:drop-shadow(0 0 6px rgba(212,160,18,0.3));"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-value">91%</div>
+          <div class="ring-label">Area Covered</div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- How it works -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">How It Works</span>
+    </div>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content"><h4>Request Online or Call</h4><p>Tell us what you need notarized and your location.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content"><h4>Nearest Agent Dispatched</h4><p>We assign the closest available certified notary.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content"><h4>Track Live on Map</h4><p>Watch your notary en route in real time.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content"><h4>Signed &amp; Sealed</h4><p>Documents notarized on the spot. Done.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sale card -->
+  <div class="card sale-card">
+    <div class="sale-card-badge">For Sale</div>
+    <h3><span class="gold">916Notary.com</span> is available</h3>
+    <p>Premium exact-match domain + this entire website, ready to launch.</p>
+    <div class="sale-includes">
+      <div class="sale-include"><span class="check">&#10003;</span> Exact-match .com domain</div>
+      <div class="sale-include"><span class="check">&#10003;</span> Full site source code</div>
+      <div class="sale-include"><span class="check">&#10003;</span> Interactive Sacramento map</div>
+      <div class="sale-include"><span class="check">&#10003;</span> SEO + Schema markup</div>
+      <div class="sale-include"><span class="check">&#10003;</span> Cloudflare hosting setup</div>
+    </div>
+    <div class="sale-btns">
+      <button class="btn-sale btn-sale-primary" onclick="openModal()">Make Offer</button>
+      <a href="/cdn-cgi/l/email-protection#98f0fdf4f4f7d8faeafdf6fcf9f6efb6fbf7f5a7ebedfaf2fdfbeca5a1a9aef6f7ecf9eae1b6fbf7f5" class="btn-sale btn-sale-ghost">Email</a>
+    </div>
+  </div>
+
 </div>
 
-<!-- MAP LEGEND -->
-<div class="legend">
-  <div class="legend-title">Coverage Demo</div>
-  <div class="legend-item"><div class="legend-dot purple"></div> Sacramento HQ</div>
-  <div class="legend-item"><div class="legend-dot ring"></div> Service cities</div>
+<!-- BOTTOM TICKER -->
+<div class="ticker">
+  <div class="ticker-content" id="tickerContent"></div>
 </div>
 
-<!-- INQUIRY MODAL -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">&times;</button>
     <h2>Make an Offer</h2>
-    <p class="modal-sub">Interested in 916notary.com? Let's talk.</p>
+    <p class="modal-sub">Interested in 916notary.com? Domain + website + hosting included.</p>
     <form id="inquiryForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
       <div class="modal-row">
         <div><label>Name</label><input type="text" name="name" required placeholder="Your name"></div>
@@ -500,242 +854,280 @@ html, body {
       <label>Your Offer / Message</label>
       <textarea name="message" placeholder="I'm interested in purchasing 916notary.com..."></textarea>
       <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off">
-      <button type="submit" class="btn-offer">Send Inquiry</button>
+      <button type="submit" class="btn-submit">Send Inquiry</button>
     </form>
     <div class="modal-success" id="formSuccess">
       <div class="icon">&#10003;</div>
       <h3>Inquiry Sent</h3>
-      <p>We'll get back to you within 24 hours.</p>
+      <p>We'll respond within 24 hours.</p>
     </div>
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ===== ZONES =====
+var zones = [
+  { name: 'Downtown', lat: 38.5816, lng: -121.4944, eta: 12, status: 'green' },
+  { name: 'Midtown', lat: 38.5720, lng: -121.4750, eta: 10, status: 'green' },
+  { name: 'East Sac', lat: 38.5650, lng: -121.4500, eta: 14, status: 'green' },
+  { name: 'Natomas', lat: 38.6424, lng: -121.5069, eta: 18, status: 'green' },
+  { name: 'Arden', lat: 38.5950, lng: -121.3900, eta: 16, status: 'green' },
+  { name: 'Land Park', lat: 38.5400, lng: -121.5000, eta: 15, status: 'green' },
+  { name: 'Folsom', lat: 38.6780, lng: -121.1761, eta: 28, status: 'amber' },
+  { name: 'Elk Grove', lat: 38.4088, lng: -121.3716, eta: 25, status: 'amber' },
+  { name: 'Roseville', lat: 38.7521, lng: -121.2880, eta: 30, status: 'amber' },
+  { name: 'R. Cordova', lat: 38.5891, lng: -121.3028, eta: 20, status: 'green' },
+  { name: 'Citrus Hts', lat: 38.7071, lng: -121.2811, eta: 22, status: 'green' },
+  { name: 'Carmichael', lat: 38.6257, lng: -121.3283, eta: 18, status: 'green' },
+  { name: 'Fair Oaks', lat: 38.6447, lng: -121.2722, eta: 22, status: 'green' },
+  { name: 'Davis', lat: 38.5449, lng: -121.7405, eta: 32, status: 'amber' },
+  { name: 'West Sac', lat: 38.5805, lng: -121.5300, eta: 16, status: 'green' },
+  { name: 'Rocklin', lat: 38.7908, lng: -121.2358, eta: 34, status: 'amber' },
+  { name: 'Orangevale', lat: 38.6780, lng: -121.2253, eta: 24, status: 'green' },
+  { name: 'Granite Bay', lat: 38.7632, lng: -121.1639, eta: 30, status: 'amber' },
+];
+
+// Build zone grid using safe DOM methods
+var zoneGrid = document.getElementById('zoneGrid');
+zones.forEach(function(z) {
+  var item = document.createElement('div');
+  item.className = 'zone-item';
+
+  var nameSpan = document.createElement('span');
+  nameSpan.className = 'zone-name';
+
+  var dot = document.createElement('span');
+  dot.className = 'zone-dot ' + z.status;
+  nameSpan.appendChild(dot);
+  nameSpan.appendChild(document.createTextNode(z.name));
+
+  var etaSpan = document.createElement('span');
+  etaSpan.className = 'zone-eta';
+  etaSpan.textContent = z.eta + 'm';
+
+  item.appendChild(nameSpan);
+  item.appendChild(etaSpan);
+  zoneGrid.appendChild(item);
+});
+
+// ===== ACTIVITY FEED =====
+var feedData = [
+  { status: 'active', agent: 'Agent N1', action: ' en route to ', location: 'Midtown', detail: ' — Loan signing', time: 'now' },
+  { status: 'complete', agent: 'Agent N3', action: ' completed POA signing in ', location: 'Rancho Cordova', detail: '', time: '12m ago' },
+  { status: 'complete', agent: 'Agent N5', action: ' completed notarization in ', location: 'Elk Grove', detail: '', time: '28m ago' },
+  { status: 'active', agent: 'Agent N2', action: ' dispatched to ', location: 'Natomas', detail: ' — Healthcare directive', time: '3m ago' },
+  { status: 'complete', agent: 'Agent N4', action: ' completed loan signing in ', location: 'Folsom', detail: '', time: '41m ago' },
+];
+
+var feedList = document.getElementById('feedList');
+feedData.forEach(function(f) {
+  var item = document.createElement('div');
+  item.className = 'feed-item';
+
+  var dotEl = document.createElement('div');
+  dotEl.className = 'feed-dot ' + f.status;
+
+  var textEl = document.createElement('div');
+  textEl.className = 'feed-text';
+  var agentStrong = document.createElement('strong');
+  agentStrong.textContent = f.agent;
+  textEl.appendChild(agentStrong);
+  textEl.appendChild(document.createTextNode(f.action));
+  var locStrong = document.createElement('strong');
+  locStrong.textContent = f.location;
+  textEl.appendChild(locStrong);
+  textEl.appendChild(document.createTextNode(f.detail));
+
+  var timeEl = document.createElement('div');
+  timeEl.className = 'feed-time';
+  timeEl.textContent = f.time;
+
+  item.appendChild(dotEl);
+  item.appendChild(textEl);
+  item.appendChild(timeEl);
+  feedList.appendChild(item);
+});
+
+// ===== TICKER =====
+var tickerTexts = [
+  { parts: [{ type: 'dot' }, { text: 'ONLINE', cls: 'ticker-green' }, { text: ' — 6 notary agents active across Sacramento' }] },
+  { parts: [{ type: 'dot' }, { text: 'AVG RESPONSE ' }, { text: '22 MIN', cls: 'ticker-gold' }, { text: ' in the 916 area' }] },
+  { parts: [{ type: 'dot' }, { text: 'DOWNTOWN zone — ' }, { text: '12 min ETA', cls: 'ticker-green' }] },
+  { parts: [{ type: 'dot' }, { text: '5,200+', cls: 'ticker-gold' }, { text: ' documents notarized this year' }] },
+  { parts: [{ type: 'dot' }, { text: 'FOLSOM zone — ' }, { text: '28 min ETA', cls: 'ticker-gold' }] },
+  { parts: [{ type: 'dot' }, { text: 'Serving all ' }, { text: '18 zones', cls: 'ticker-gold' }, { text: ' in the 916 area code' }] },
+  { parts: [{ type: 'dot' }, { text: 'ELK GROVE zone — ' }, { text: '25 min ETA', cls: 'ticker-gold' }] },
+  { parts: [{ type: 'dot' }, { text: 'RATED ' }, { text: '4.9/5', cls: 'ticker-gold' }, { text: ' from 340+ reviews' }] },
+  { parts: [{ type: 'dot' }, { text: '24/7', cls: 'ticker-green' }, { text: ' availability — nights, weekends, holidays' }] },
+  { parts: [{ type: 'dot' }, { text: 'NNA CERTIFIED — bonded & insured agents' }] },
+];
+
+var tickerContent = document.getElementById('tickerContent');
+function buildTickerItems(arr) {
+  arr.forEach(function(item) {
+    var span = document.createElement('span');
+    span.className = 'ticker-item';
+    item.parts.forEach(function(p) {
+      if (p.type === 'dot') {
+        var d = document.createElement('span');
+        d.className = 'ticker-dot';
+        span.appendChild(d);
+      } else {
+        var s = document.createElement('span');
+        if (p.cls) s.className = p.cls;
+        s.textContent = p.text;
+        span.appendChild(s);
+      }
+    });
+    tickerContent.appendChild(span);
+  });
+}
+buildTickerItems(tickerTexts);
+buildTickerItems(tickerTexts); // duplicate for seamless loop
+
 // ===== MAP =====
-const map = L.map('map', {
-  center: [38.56, -121.32],
-  zoom: 12,
+var map = L.map('map', {
+  center: [38.56, -121.40],
+  zoom: 11,
   zoomControl: false,
   attributionControl: false,
   dragging: true,
-  scrollWheelZoom: false,
-  doubleClickZoom: false,
+  scrollWheelZoom: true,
+  doubleClickZoom: true,
   touchZoom: true,
 });
 
-// Dark purple-tinted basemap
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  maxZoom: 19,
-}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-// Purple tint overlay on map tiles
-const mapEl = document.getElementById('map');
-mapEl.style.filter = 'saturate(0.5) hue-rotate(20deg) brightness(0.85)';
+// Zone circles
+zones.forEach(function(z) {
+  var color = z.status === 'green' ? '#22c55e' : '#f59e0b';
+  L.circle([z.lat, z.lng], {
+    radius: z.status === 'green' ? 4000 : 6000,
+    color: color, weight: 1, opacity: 0.25,
+    fillColor: color, fillOpacity: 0.05,
+  }).addTo(map);
+});
 
-// ===== COVERAGE RADIUS =====
+// 916 coverage boundary
 L.circle([38.5816, -121.4944], {
-  radius: 48000,
-  color: '#9b59d0',
-  weight: 1.5,
-  opacity: 0.25,
-  fillColor: '#9b59d0',
-  fillOpacity: 0.04,
-  dashArray: '8 6',
+  radius: 50000, color: '#d4a012', weight: 2, opacity: 0.15,
+  fillColor: '#d4a012', fillOpacity: 0.02, dashArray: '10 8',
 }).addTo(map);
 
-L.circle([38.5816, -121.4944], {
-  radius: 24000,
-  color: '#9b59d0',
-  weight: 1,
-  opacity: 0.12,
-  fill: false,
-  dashArray: '4 6',
-}).addTo(map);
+// Tooltip styles
+var tooltipStyle = document.createElement('style');
+tooltipStyle.textContent = [
+  '.city-tooltip {',
+  '  background: rgba(8,9,12,0.92) !important;',
+  '  color: #e4e8ef !important;',
+  '  border: 1px solid rgba(255,255,255,0.08) !important;',
+  '  border-radius: 6px !important;',
+  '  padding: 3px 10px !important;',
+  '  font-family: "JetBrains Mono", monospace !important;',
+  '  font-size: 10px !important;',
+  '  font-weight: 600 !important;',
+  '  box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;',
+  '}',
+  '.leaflet-tooltip-top::before { border-top-color: rgba(8,9,12,0.92) !important; }',
+  '.leaflet-tooltip-right::before { border-right-color: rgba(8,9,12,0.92) !important; }',
+  '.agent-marker {',
+  '  width: 30px; height: 30px;',
+  '  background: rgba(8,9,12,0.85);',
+  '  border: 2px solid #d4a012;',
+  '  border-radius: 50%;',
+  '  display: flex; align-items: center; justify-content: center;',
+  '  font-family: "JetBrains Mono", monospace;',
+  '  font-weight: 800; font-size: 10px;',
+  '  color: #d4a012;',
+  '  box-shadow: 0 0 12px rgba(212,160,18,0.3);',
+  '  animation: agent-pulse 2.5s ease-in-out infinite;',
+  '}',
+  '@keyframes agent-pulse {',
+  '  0%, 100% { box-shadow: 0 0 12px rgba(212,160,18,0.3), 0 0 0 0 rgba(212,160,18,0.15); }',
+  '  50% { box-shadow: 0 0 12px rgba(212,160,18,0.3), 0 0 0 8px rgba(212,160,18,0); }',
+  '}',
+].join('\n');
+document.head.appendChild(tooltipStyle);
 
-// ===== CITIES =====
-const cities = [
-  { name: 'Sacramento',      lat: 38.5816, lng: -121.4944, main: true },
-  { name: 'Folsom',          lat: 38.6780, lng: -121.1761 },
-  { name: 'Roseville',       lat: 38.7521, lng: -121.2880 },
-  { name: 'Elk Grove',       lat: 38.4088, lng: -121.3716 },
-  { name: 'Rancho Cordova',  lat: 38.5891, lng: -121.3028 },
-  { name: 'Citrus Heights',  lat: 38.7071, lng: -121.2811 },
-  { name: 'Davis',           lat: 38.5449, lng: -121.7405 },
-  { name: 'Woodland',        lat: 38.6785, lng: -121.7733 },
-  { name: 'Rocklin',         lat: 38.7908, lng: -121.2358 },
-  { name: 'El Dorado Hills', lat: 38.6857, lng: -121.0750 },
-  { name: 'Granite Bay',     lat: 38.7632, lng: -121.1639 },
-  { name: 'West Sacramento', lat: 38.5805, lng: -121.5300 },
-  { name: 'Carmichael',      lat: 38.6257, lng: -121.3283 },
-  { name: 'Fair Oaks',       lat: 38.6447, lng: -121.2722 },
-  { name: 'Orangevale',      lat: 38.6780, lng: -121.2253 },
-  { name: 'Natomas',         lat: 38.6424, lng: -121.5069 },
-  { name: 'Lincoln',         lat: 38.8916, lng: -121.2930 },
-  { name: 'Placerville',     lat: 38.7296, lng: -120.7983 },
-];
-
-cities.forEach(city => {
-  const size = city.main ? 14 : 7;
-  const icon = L.divIcon({
+// Zone markers
+zones.forEach(function(z) {
+  var size = z.name === 'Downtown' ? 10 : 5;
+  var color = z.status === 'green' ? '#22c55e' : '#f59e0b';
+  var markerDiv = document.createElement('div');
+  markerDiv.style.cssText = 'width:' + size + 'px;height:' + size + 'px;background:' + color + ';border-radius:50%;opacity:0.7;box-shadow:0 0 8px ' + color + '40;';
+  var icon = L.divIcon({
     className: '',
-    html: city.main
-      ? `<div style="width:${size}px;height:${size}px;background:#9b59d0;border-radius:50%;box-shadow:0 0 20px rgba(155,89,208,0.6),0 0 60px rgba(155,89,208,0.2);border:2px solid rgba(155,89,208,0.8);"></div>`
-      : `<div style="width:${size}px;height:${size}px;background:rgba(155,89,208,0.65);border-radius:50%;box-shadow:0 0 8px rgba(155,89,208,0.3);border:1.5px solid rgba(155,89,208,0.35);"></div>`,
+    html: markerDiv.outerHTML,
     iconSize: [size, size],
     iconAnchor: [size/2, size/2],
   });
-  const m = L.marker([city.lat, city.lng], { icon }).addTo(map);
-  m.bindTooltip(city.name, {
-    permanent: city.main,
-    direction: city.main ? 'right' : 'top',
-    offset: city.main ? [12, 0] : [0, -6],
-    className: 'city-tooltip',
-  });
+  L.marker([z.lat, z.lng], { icon: icon }).addTo(map)
+    .bindTooltip(z.name + ' \u2014 ' + z.eta + 'm', { direction: 'top', offset: [0, -6], className: 'city-tooltip' });
 });
 
-// Tooltip style
-const s = document.createElement('style');
-s.textContent = `
-  .city-tooltip {
-    background: rgba(18,10,30,0.94) !important;
-    color: #e8ecf2 !important;
-    border: 1px solid rgba(155,89,208,0.2) !important;
-    border-radius: 8px !important;
-    padding: 4px 11px !important;
-    font-family: 'Space Grotesk', sans-serif !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-  }
-  .leaflet-tooltip-top::before { border-top-color: rgba(18,10,30,0.94) !important; }
-  .leaflet-tooltip-right::before { border-right-color: rgba(18,10,30,0.94) !important; }
-`;
-document.head.appendChild(s);
-
-// ===== NOTARY ROUTE: FOLSOM → ELK GROVE =====
-const route = [
-  [38.6780, -121.1761],  // Folsom
-  [38.6550, -121.2100],
-  [38.6350, -121.2500],
-  [38.6150, -121.2800],
-  [38.5891, -121.3028],  // Rancho Cordova
-  [38.5816, -121.3500],
-  [38.5700, -121.3800],
-  [38.5500, -121.3900],
-  [38.5200, -121.3850],
-  [38.4800, -121.3800],
-  [38.4500, -121.3750],
-  [38.4088, -121.3716],  // Elk Grove
+// ===== NOTARY AGENTS =====
+var agents = [
+  { id: 'N1', route: [[38.58, -121.49], [38.57, -121.47], [38.56, -121.45], [38.57, -121.48], [38.58, -121.49]], idx: 0 },
+  { id: 'N2', route: [[38.64, -121.50], [38.63, -121.48], [38.62, -121.46], [38.63, -121.49], [38.64, -121.50]], idx: 0 },
+  { id: 'N3', route: [[38.59, -121.30], [38.60, -121.32], [38.61, -121.34], [38.60, -121.31], [38.59, -121.30]], idx: 0 },
+  { id: 'N4', route: [[38.67, -121.18], [38.66, -121.20], [38.65, -121.22], [38.66, -121.19], [38.67, -121.18]], idx: 0 },
+  { id: 'N5', route: [[38.41, -121.37], [38.42, -121.38], [38.43, -121.39], [38.42, -121.37], [38.41, -121.37]], idx: 0 },
+  { id: 'N6', route: [[38.55, -121.53], [38.56, -121.51], [38.57, -121.52], [38.56, -121.53], [38.55, -121.53]], idx: 0 },
 ];
 
-L.polyline(route, { color: '#9b59d0', weight: 3, opacity: 0.5 }).addTo(map);
-
-const nIcon = L.divIcon({
-  className: '',
-  html: `<div style="width:30px;height:30px;background:#9b59d0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif;box-shadow:0 0 20px rgba(155,89,208,0.5),0 0 50px rgba(155,89,208,0.15);border:2px solid rgba(255,255,255,0.15);animation:np 2s ease-in-out infinite;">N</div><style>@keyframes np{0%,100%{box-shadow:0 0 20px rgba(155,89,208,0.5),0 0 0 0 rgba(155,89,208,0.3)}50%{box-shadow:0 0 20px rgba(155,89,208,0.5),0 0 0 10px rgba(155,89,208,0)}}</style>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 15],
+var agentMarkers = agents.map(function(a) {
+  var agentDiv = document.createElement('div');
+  agentDiv.className = 'agent-marker';
+  agentDiv.textContent = a.id;
+  var icon = L.divIcon({
+    className: '',
+    html: agentDiv.outerHTML,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+  var marker = L.marker(a.route[0], { icon: icon }).addTo(map);
+  marker.bindTooltip('Agent ' + a.id + ' \u2014 En route', { direction: 'top', offset: [0, -20], className: 'city-tooltip' });
+  return marker;
 });
-const nm = L.marker(route[0], { icon: nIcon }).addTo(map);
-nm.bindTooltip('Notary en route', { direction: 'top', offset: [0, -20], className: 'city-tooltip' });
 
-let ri = 0;
-setInterval(() => { ri = (ri + 1) % route.length; nm.setLatLng(route[ri]); }, 2500);
+setInterval(function() {
+  agents.forEach(function(a, i) {
+    a.idx = (a.idx + 1) % a.route.length;
+    agentMarkers[i].setLatLng(a.route[a.idx]);
+  });
+}, 3000);
 
-// ===== GOLDEN 1 CENTER BEAM =====
-const g1LatLng = [38.5802, -121.4997]; // Golden 1 Center
-
-// G1 marker
-const g1Icon = L.divIcon({
-  className: '',
-  html: `<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:16px;filter:drop-shadow(0 0 12px rgba(155,89,208,0.6));">&#128081;</div>`,
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-});
-const g1Marker = L.marker(g1LatLng, { icon: g1Icon }).addTo(map);
-g1Marker.bindTooltip('Golden 1 Center', { direction: 'top', offset: [0, -14], className: 'city-tooltip' });
-
-// Canvas beam from G1
-const canvas = document.getElementById('beamCanvas');
-const ctx = canvas.getContext('2d');
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-function drawBeam() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Convert G1 lat/lng to screen pixel
-  const g1Point = map.latLngToContainerPoint(g1LatLng);
-  const x = g1Point.x;
-  const y = g1Point.y;
-
-  // Solid straight beam — no spread
-  const beamWidth = 6;
-
-  // Outer glow
-  ctx.beginPath();
-  ctx.moveTo(x - beamWidth * 2, y);
-  ctx.lineTo(x - beamWidth * 2, 0);
-  ctx.lineTo(x + beamWidth * 2, 0);
-  ctx.lineTo(x + beamWidth * 2, y);
-  ctx.closePath();
-  const glowGrad = ctx.createLinearGradient(x - beamWidth * 2, 0, x + beamWidth * 2, 0);
-  glowGrad.addColorStop(0, 'rgba(155, 89, 208, 0)');
-  glowGrad.addColorStop(0.3, 'rgba(155, 89, 208, 0.12)');
-  glowGrad.addColorStop(0.5, 'rgba(155, 89, 208, 0.2)');
-  glowGrad.addColorStop(0.7, 'rgba(155, 89, 208, 0.12)');
-  glowGrad.addColorStop(1, 'rgba(155, 89, 208, 0)');
-  ctx.fillStyle = glowGrad;
-  ctx.fill();
-
-  // Core beam — solid, straight, no taper
-  ctx.beginPath();
-  ctx.moveTo(x - beamWidth / 2, y);
-  ctx.lineTo(x - beamWidth / 2, 0);
-  ctx.lineTo(x + beamWidth / 2, 0);
-  ctx.lineTo(x + beamWidth / 2, y);
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(180, 130, 255, 0.45)';
-  ctx.fill();
-
-  // Bright center line
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x, 0);
-  ctx.strokeStyle = 'rgba(220, 190, 255, 0.6)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  requestAnimationFrame(drawBeam);
-}
-drawBeam();
-
-// Redraw beam when map moves
-map.on('move', () => {});
+// ===== LIVE METRIC FLUCTUATION =====
+setInterval(function() {
+  var etaBase = 22;
+  var jitter = Math.floor(Math.random() * 7) - 3;
+  var eta = Math.max(8, etaBase + jitter);
+  document.getElementById('metricEta').textContent = eta + 'm';
+  document.getElementById('avgEta').textContent = eta + ' MIN';
+  var agentCount = 5 + Math.floor(Math.random() * 3);
+  document.getElementById('metricAgents').textContent = agentCount;
+  document.getElementById('agentCount').textContent = agentCount + ' agents online';
+}, 8000);
 
 // ===== MODAL =====
 function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 
-// ===== FORM =====
 document.getElementById('inquiryForm').addEventListener('submit', function(e) {
-  if (this.action.includes('YOUR_FORM_ID')) {
+  if (this.action.indexOf('YOUR_FORM_ID') !== -1) {
     e.preventDefault();
     this.style.display = 'none';
     document.getElementById('formSuccess').classList.add('show');
     return;
   }
   e.preventDefault();
-  fetch(this.action, { method: 'POST', body: new FormData(this), headers: { 'Accept': 'application/json' } })
-    .then(() => { this.style.display = 'none'; document.getElementById('formSuccess').classList.add('show'); })
-    .catch(() => { this.style.display = 'none'; document.getElementById('formSuccess').classList.add('show'); });
+  var form = this;
+  fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
+    .then(function() { form.style.display = 'none'; document.getElementById('formSuccess').classList.add('show'); })
+    .catch(function() { form.style.display = 'none'; document.getElementById('formSuccess').classList.add('show'); });
 });
 </script>
 </body>
